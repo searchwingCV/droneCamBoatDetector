@@ -1,5 +1,5 @@
-# CV for searchwing drones
-![alt text](https://raw.githubusercontent.com/julled/searchwing/master/screenshot.jpg)
+# ComputerVision for searchwing drones
+![alt text](https://raw.githubusercontent.com/searchwingCV/droneCamBoatDetector/master/screenshot.jpg)
 * Left: 3D View 
     * "Cam": 3D-Position and orientation of drone camera
     * Pink points: the visible area in the image
