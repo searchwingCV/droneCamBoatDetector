@@ -1,0 +1,9 @@
+<launch>
+    <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/camera raw out:=/camera/image_raw" />
+    <node pkg="tf" type="static_transform_publisher" name="Base2camBase" args="0 0 0 0 1.57 0 base_link cam_base 100" />
+    <node pkg="tf" type="static_transform_publisher" name="camBase2camCoord" args="0 0 0 -1.57 0 -1.57 cam_base cam 100" />
+
+    <node name="boatDetectorNode" pkg="searchwing" output="screen" type="boatDetectorNode.py" />
+
+    <node name="visualization" pkg="rviz" type="rviz" output="screen" args="-d $(find searchwing)/config/droneAllBBFollow.rviz" />
+</launch>
