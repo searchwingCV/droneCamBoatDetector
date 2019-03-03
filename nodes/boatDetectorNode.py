@@ -20,7 +20,6 @@ from cv_bridge import CvBridge
 
 #searchwing stuff
 from searchwingCv import roiDetector
-from searchwingCv import roiDescriptor
 from searchwingCv import roiTracker
 
 rospy.init_node('roiDetector', anonymous=True)
@@ -35,9 +34,12 @@ from searchwingCvRos import camCalibParser
 #Program is eventtriggered, thus it calls the callback when a new Image is received
 def listener():
     imgTopicName = 'camera/image_raw' # subscribe the camera data stream
-    #calibTopicName = "camera/camera_info" # subscribe to the camera calib data stream
     rospy.Subscriber(imgTopicName,Image,callbackImg)
+
+    ##Not used currently as we load the calib from file directly
     #rospy.Subscriber(calibTopicName,CameraInfo,callbackCamCalib)
+    #calibTopicName = "camera/camera_info" # subscribe to the camera calib data stream
+
     print("node started: Loop until new data arrives")
     #Loop until new data arrives
     rospy.spin()
@@ -58,17 +60,6 @@ dbgVis.setCamIntrinsics(camModel)
 
 #Transform functions
 tf_listener = tf.TransformListener() # must be outside callback
-
-#Stuff to load the ROI descriptor
-descriptor = roiDescriptor.Descriptors()
-descriptorLen = len(descriptor.getDescrNames())
-#Stuff to load the classifier
-from sklearn.externals import joblib
-import rospkg
-rospack = rospkg.RosPack()
-classifierpath = dirname + "/../config/classifier.pkl"
-clf=joblib.load(classifierpath)
-clf.n_jobs=1
 
 tracker = roiTracker.roiTracker()
 
@@ -147,47 +138,7 @@ def callbackImg(data):
     """
     end = time.time()
     print("3d pos estimate [sek]:", end - start)
-    """
-    #####Roi Descriptor
-    #Get cutout images of the ROIs
-    start = time.time()
-    roiBGRImages = roiDetector.extractImagesFromROIs(ROIsSizeFiltered, cv_img)
-    roiMASKImages = roiDetector.extractImagesFromROIs(ROIsSizeFiltered, mask_img)
-    end = time.time()
-    print("extractImagesFromROIs [sek]:", end - start)
 
-    #Calculate descriptor of each cutout image
-    roiDescriptions = np.empty((len(ROIsSizeFiltered), descriptorLen,))
-    roiDescriptions[:] = np.nan
-    start = time.time()
-    i = 0
-    for (roiBGR, roiMASK) in zip(roiBGRImages, roiMASKImages):
-        description = descriptor.calcDescrROI(roiBGR, roiMASK)
-        roiDescriptions[i, :] = description
-        i = i + 1
-    end = time.time()
-    #Filter results on validity
-    nonNanIndizes=~np.isnan(roiDescriptions).any(axis=1)
-    npROIs=np.asarray(ROIsSizeFiltered)
-    roiDescriptions=roiDescriptions[nonNanIndizes]
-    validROIs=npROIs[nonNanIndizes]
-    print("calcDescrROI [sek]:", end - start)
-
-    ####Classify the descriptors of the ROIs
-    start = time.time()
-    roiClassifications=clf.predict(roiDescriptions)
-    end = time.time()
-    print("predict [sek]:",end - start)
-
-    #Get only data from "boat" classifications for further processing
-    valid3DDetections=[]
-    for idx,roiClassification in enumerate(roiClassifications,0):
-        if(roiClassification == "boat"):
-            cv2.rectangle(imgDbgVis, (validROIs[idx][0],validROIs[idx][1]), (validROIs[idx][2],validROIs[idx][3]), (255, 255, 0), 3)
-            boat3dPoint= ROIs3dCenters[idx]
-            valid3DDetections.append(boat3dPoint)
-    """
-    #
     valid3DDetections=[]
     for oneROI3DPt in ROIs3dCenters:
         valid3DDetections.append(oneROI3DPt)
