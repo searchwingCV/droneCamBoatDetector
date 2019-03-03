@@ -6,7 +6,6 @@
 import cv2
 import numpy as np
 
-
 def load_pic(inpath):
     """
     Load rgb picture from specific path with cv2
@@ -264,17 +263,18 @@ def imgProcess2Gradients(inpic, maxPixelVal, gradMode, gradSize, gaussKernelSize
     :return:
     """
     contrasted_img = adjust_contrast_pic(inpic, 1.3, 0)
-    medianed_img=remove_median(contrasted_img,maxPixelVal)
+    #medianed_img=remove_median(contrasted_img,maxPixelVal) #not necessary
     blurred_pic = gauss_blur_pic(contrasted_img, gaussKernelSize, gausssigmaSize)
     img_grad = calc_grad_pic(blurred_pic, ksize=gradSize, mode=gradMode)  # (blurred_pic)
     return img_grad
 
-def detectROIs(img, gradSize=1, gaussBlurKernelSize=15, openSize=3):
+def detectROIs(img, gradSize=1, gaussBlurKernelSize=15, gradThreshold=99.4, openSize=3 ):
     """
     detect all ROIs in the given image
     :param img: inpic as RGB
     :param gradSize: size of the gradient kernel
     :param gaussBlurKernelSize: size of the gaussian blur kernel
+    :param gradThreshold: percentage of lowest value pixels in img which get removed by this threshold
     :param openSize: size of the kernel of the morphologic open operation
     :return:
     """
@@ -297,7 +297,7 @@ def detectROIs(img, gradSize=1, gaussBlurKernelSize=15, openSize=3):
     gradients_combined_1 = Add_Pics(gradients_h_weighted, gradients_s)
     gradients_combined_2 = Add_Pics(gradients_combined_1, gradients_v)
 
-    grad_threshed = percentile_threshold_Pic(gradients_combined_2, 99.4)
+    grad_threshed = percentile_threshold_Pic(gradients_combined_2, gradThreshold)
     # img_threshed_denoised = denoise_pic(img_threshed,kernelsize=2,iterations=1)
     img_morph_opened = morph_pic(grad_threshed, openSize, cv2.MORPH_OPEN)  # openSize=2
     img_dilated = dilate_pic(img_morph_opened, 5)
