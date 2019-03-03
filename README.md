@@ -36,7 +36,7 @@ source /catkin_ws/devel/setup.bash
 * Download the bodenSee2018HalfRes.bag dataset:
 https://cloud.hs-augsburg.de/index.php/s/fgXNLN2Qza6ercr
 
-## Run "detection by tracking" algorithm on the bodensee-dataset
+## Run on the bodensee-dataset
 * New Terminal: Start roscore
 ```
 roscore
@@ -70,18 +70,6 @@ rosparam set use_sim_time true
 ```
 before you start the editor in the terminal. Also comment out the start of the node in the bodenseeDataset.launch file.
 
-     
-## Additional stuff
-### /scripts folder
-* generateROIproposalsPascalVoc.py
-    * generate ROIs for all the images in the provided folder in the pascal voc format alongside the images as xml files
-    * you can edit the labelfiles (xmls) by using the labelImg labeling tool: https://github.com/tzutalin/labelImg
-* extractDescriptorsFromROIs.py
-    * calculate descriptors for the provided groundtruth data and saves them to a hdf5 file 
-* trainClassifier.py / trainClassifier.ipynb
-    * trains a random forest classifier based on the provided descriptors
-        
-        
     
 
 
