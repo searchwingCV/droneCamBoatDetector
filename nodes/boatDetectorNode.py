@@ -147,7 +147,7 @@ def callbackImg(data):
     """
     end = time.time()
     print("3d pos estimate [sek]:", end - start)
-    """
+
     #####Roi Descriptor
     #Get cutout images of the ROIs
     start = time.time()
@@ -186,11 +186,7 @@ def callbackImg(data):
             cv2.rectangle(imgDbgVis, (validROIs[idx][0],validROIs[idx][1]), (validROIs[idx][2],validROIs[idx][3]), (255, 255, 0), 3)
             boat3dPoint= ROIs3dCenters[idx]
             valid3DDetections.append(boat3dPoint)
-    """
-    #
-    valid3DDetections=[]
-    for oneROI3DPt in ROIs3dCenters:
-        valid3DDetections.append(oneROI3DPt)
+
 
     #Track roiDetections over time to validate them
     start = time.time()
