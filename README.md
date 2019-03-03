@@ -1,5 +1,5 @@
-# CV for searchwing drones
-![alt text](https://raw.githubusercontent.com/julled/searchwing/master/screenshot.jpg)
+# ComputerVision for searchwing drones
+![alt text](https://raw.githubusercontent.com/searchwingCV/droneCamBoatDetector/master/screenshot.jpg)
 * Left: 3D View 
     * "Cam": 3D-Position and orientation of drone camera
     * Pink points: the visible area in the image
@@ -25,7 +25,7 @@ ROS handles the communication between the different modules, transforms 3d-data 
 * git clone this repo  
 ```
 cd /catkin_ws/src/
-git clone https://github.com/julled/searchwing.git
+https://github.com/searchwingCV/droneCamBoatDetector.git
 ```
 * Compile/install  
 ``` 
@@ -34,7 +34,7 @@ catkin_make install
 source /catkin_ws/devel/setup.bash
 ```
 * Download the bodenSee2018HalfRes.bag dataset:
-https://cloud.hs-augsburg.de/index.php/s/Wye6ZLkNWAmE9Jb?path=%2F
+https://cloud.hs-augsburg.de/index.php/s/fgXNLN2Qza6ercr
 
 ## Run "detection by tracking" algorithm on the bodensee-dataset
 * New Terminal: Start roscore
