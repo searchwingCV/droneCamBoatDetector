@@ -36,7 +36,7 @@ source /catkin_ws/devel/setup.bash
 * Download the bodenSee2018HalfRes.bag dataset:
 https://cloud.hs-augsburg.de/index.php/s/fgXNLN2Qza6ercr
 
-## Run "detection by tracking" algorithm on the bodensee-dataset
+## Detect boats by classification using simple features and dataset on the bodensee-dataset
 * New Terminal: Start roscore
 ```
 roscore
