@@ -4,7 +4,6 @@ import sys
 import cv2
 import time
 cv2.useOptimized()
-import matplotlib.pyplot as plt
 
 import roiDetector
 
@@ -30,7 +29,13 @@ for i in range(10):
                                                       openSize=3)
     end = time.time()
     print("roiDetector duration [sek]:", end - start)
+
 #visualize
-out = roiDetector.drawBoundingBoxesToImg(pic, ROIs)
-plt.imshow(out,cmap="gray")
-plt.show()
+imgBoundingBoxes=roiDetector.drawBoundingBoxesToImg(pic,ROIs)
+cv2.imwrite("testOut.jpg", imgBoundingBoxes)
+
+#plot
+#import matplotlib.pyplot as plt
+#out = roiDetector.drawBoundingBoxesToImg(pic, ROIs)
+#plt.imshow(out,cmap="gray")
+#plt.show()
