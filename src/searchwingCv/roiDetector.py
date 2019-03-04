@@ -56,13 +56,27 @@ def percentile_threshold_Pic(inpic, percentile):
     threshold input image by a given percentile
     only pixel with a value above the given percentile gets returned
     :param inpic:
-    :param percentile: input percentile as integer
+    :param percentile: input percentile as float
     :return:
     """
-    tresh = np.percentile(inpic, percentile)
+    #tresh = np.percentile(inpic, percentile*100)
+    
+    perc = percentile/100
+    hist = cv2.calcHist([sobel],[0],None,[256],[0,255])
+    targetCnt = sobel.size*perc
+    curVal = 0
+    pixCnt = 0
+    for x in np.nditer(hist):
+        pixCnt = pixCnt + x
+        print(pixCnt)
+        if pixCnt > targetCnt:
+            break
+        else:
+            curVal = curVal + 1
+    tresh = curVal
+
     ret, img_threshed = cv2.threshold(inpic, tresh, 255, cv2.THRESH_BINARY)
     return img_threshed
-
 
 def Or_Pics(inpic1, inpic2):
     """
@@ -268,7 +282,7 @@ def imgProcess2Gradients(inpic, maxPixelVal, gradMode, gradSize, gaussKernelSize
     img_grad = calc_grad_pic(blurred_pic, ksize=gradSize, mode=gradMode)  # (blurred_pic)
     return img_grad
 
-def detectROIs(img, gradSize=1, gaussBlurKernelSize=15, gradThreshold=99.4, openSize=3 ):
+def detectROIs(img, gradSize=1, gaussBlurKernelSize=15, gradThreshold=0.994, openSize=3 ):
     """
     detect all ROIs in the given image
     :param img: inpic as RGB
