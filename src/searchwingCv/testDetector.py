@@ -19,13 +19,13 @@ pic=roiDetector.load_pic(path)
 #process
 print("Run ROI detector one time for warmup...")
 
-ROIs, contours, mask_img = roiDetector.detectROIs(pic, gradSize=1, gaussBlurKernelSize=15, gradThreshold=99.4,
+ROIs, contours, mask_img = roiDetector.detectROIs(pic, gradSize=1, gaussBlurKernelSize=15, gradThreshold=0.994,
                                                   openSize=3)
 
 print("Run ROI detector 5 times...")
-for i in range(10):
+for i in range(5):
     start = time.time()
-    ROIs, contours, mask_img = roiDetector.detectROIs(pic, gradSize=1, gaussBlurKernelSize=15, gradThreshold=99.4,
+    ROIs, contours, mask_img = roiDetector.detectROIs(pic, gradSize=1, gaussBlurKernelSize=15, gradThreshold=0.994,
                                                       openSize=3)
     end = time.time()
     print("roiDetector duration [sek]:", end - start)
