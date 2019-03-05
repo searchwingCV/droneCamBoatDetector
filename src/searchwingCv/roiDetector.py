@@ -62,8 +62,8 @@ def percentile_threshold_Pic(inpic, percentile):
     #tresh = np.percentile(inpic, percentile*100)
     
     perc = percentile/100
-    hist = cv2.calcHist([sobel],[0],None,[256],[0,255])
-    targetCnt = sobel.size*perc
+    hist = cv2.calcHist([inpic],[0],None,[256],[0,255])
+    targetCnt = inpic.size*perc
     curVal = 0
     pixCnt = 0
     for x in np.nditer(hist):
