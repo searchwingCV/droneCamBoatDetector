@@ -67,7 +67,6 @@ def percentile_threshold_Pic(inpic, percentile):
     pixCnt = 0
     for x in np.nditer(hist):
         pixCnt = pixCnt + x
-        print(pixCnt)
         if pixCnt > targetCnt:
             break
         else:
