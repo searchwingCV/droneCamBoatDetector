@@ -81,7 +81,7 @@ def callbackImg(data):
 
     ####Run ROI-Detection Pipeline
     start = time.time()
-    ROIs,contours,mask_img=roiDetector.detectROIs(rgb, gradSize=1, gaussBlurKernelSize=15, gradThreshold=0.994, openSize=3)
+    ROIs,contours,mask_img=roiDetector.detectROIs(rgb, doGaussBlur=True, gaussBlurKernelSize=5, gradSize=3, gradThreshold=0.994, openSize=2)
     end = time.time()
     imgDbgVis = roiDetector.drawBoundingBoxesToImg(rgb,ROIs)
     print("detectROIs [sek]:",end - start)

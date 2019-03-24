@@ -47,7 +47,7 @@ def gauss_blur_pic(inpic, kernelsize, sigmaSize):
     :param sigmaSize: sigma size
     :return:
     """
-    gauss_img = cv2.GaussianBlur(inpic, (kernelsize, kernelsize), sigmaX=sigmaSize, sigmaY=sigmaSize)
+    gauss_img = cv2.GaussianBlur(inpic, (kernelsize, kernelsize), sigmaX=sigmaSize, sigmaY=sigmaSize, borderType=cv2.BORDER_DEFAULT) # BORDER_DEFAULT == BORDER_REFLECT_101 => replicate pixel outside image
     return gauss_img
 
 
@@ -61,7 +61,7 @@ def percentile_threshold_Pic(inpic, percentile):
     """
     #tresh = np.percentile(inpic, percentile*100)
     
-    hist = cv2.calcHist([inpic],[0],None,[256],[0,255])
+    hist = cv2.calcHist([inpic],[0],None,[256],[0,256]) # given values at range are EXCLUSIVE, not inclusive, therefore 256 need to be putted
     targetCnt = inpic.size*percentile
     curVal = 0
     pixCnt = 0
@@ -72,6 +72,7 @@ def percentile_threshold_Pic(inpic, percentile):
         else:
             curVal = curVal + 1
     tresh = curVal
+    #print(tresh)
 
     ret, img_threshed = cv2.threshold(inpic, tresh, 255, cv2.THRESH_BINARY)
     return img_threshed
@@ -178,7 +179,7 @@ def calc_grad_pic(inPic, ksize, mode):
     """
     ddepth = cv2.CV_16S
     if (mode == "sobel"):
-        kw = dict(ksize=ksize, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+        kw = dict(ksize=ksize, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT) # BORDER_DEFAULT == BORDER_REFLECT_101 => replicate pixel outside image
         grad_x = cv2.Sobel(inPic, ddepth, 1, 0, **kw)
         grad_y = cv2.Sobel(inPic, ddepth, 0, 1, **kw)
         # Converting back to uint8.
@@ -255,15 +256,13 @@ def extractImagesFromROIs(boundingBoxes, inpic):
     :return: a vector of all the images inside the ROIs
     """
     RoiImages = []
-    i = 0
     for bb in boundingBoxes:
         roi = inpic[bb[1]:bb[3], bb[0]:bb[2]]
         RoiImages.append(roi)
-        i = i + 1
     return RoiImages
 
 
-def imgProcess2Gradients(inpic, maxPixelVal, gradMode, gradSize, gaussKernelSize, gausssigmaSize):
+def imgProcess2Gradients(inpic, doGaussBlur, gaussKernelSize, gausssigmaSize, gradMode, gradSize):
     """
     calculate gradient of a given image
     :param inpic: inpic
@@ -274,13 +273,16 @@ def imgProcess2Gradients(inpic, maxPixelVal, gradMode, gradSize, gaussKernelSize
     :param gausssigmaSize: gaussian blur sigma
     :return:
     """
-    contrasted_img = adjust_contrast_pic(inpic, 1.3, 0)
-    #medianed_img=remove_median(contrasted_img,maxPixelVal) #not necessary
-    blurred_pic = gauss_blur_pic(contrasted_img, gaussKernelSize, gausssigmaSize)
-    img_grad = calc_grad_pic(blurred_pic, ksize=gradSize, mode=gradMode)  # (blurred_pic)
+    #contrasted_img = adjust_contrast_pic(inpic, 1.3, 0) # gradient not changed by simple multiplication
+    #medianed_img = remove_median(contrasted_img,maxPixelVal) #not necessary
+    if  doGaussBlur == True:
+        blurred_pic = gauss_blur_pic(inpic, gaussKernelSize, gausssigmaSize)
+        img_grad = calc_grad_pic(blurred_pic, ksize=gradSize, mode=gradMode)  # (blurred_pic)
+    else:
+        img_grad = calc_grad_pic(inpic, ksize=gradSize, mode=gradMode)  # (blurred_pic)
     return img_grad
 
-def detectROIs(img, gradSize=1, gaussBlurKernelSize=15, gradThreshold=0.994, openSize=3 ):
+def detectROIs(img, doGaussBlur=True, gaussBlurKernelSize=5,gradSize=3, gradThreshold=0.9994, openSize=3 ):
     """
     detect all ROIs in the given image
     :param img: inpic as RGB
@@ -296,12 +298,15 @@ def detectROIs(img, gradSize=1, gaussBlurKernelSize=15, gradThreshold=0.994, ope
 
     #calculate gradients for every channel
     gradMode = "sobel"
-    gradients_h = imgProcess2Gradients(img_hsv_h, 180, gradMode=gradMode, gradSize=gradSize,
-                                       gaussKernelSize=gaussBlurKernelSize, gausssigmaSize=0)
-    gradients_s = imgProcess2Gradients(img_hsv_s, 256, gradMode=gradMode, gradSize=gradSize,
-                                       gaussKernelSize=gaussBlurKernelSize, gausssigmaSize=0)
-    gradients_v = imgProcess2Gradients(img_hsv_v, 256, gradMode=gradMode, gradSize=gradSize,
-                                       gaussKernelSize=gaussBlurKernelSize, gausssigmaSize=0)
+    gradients_h = imgProcess2Gradients(inpic=img_hsv_h, 
+                                        doGaussBlur = doGaussBlur, gaussKernelSize=gaussBlurKernelSize, gausssigmaSize=0,
+                                        gradMode=gradMode, gradSize=gradSize)
+    gradients_s = imgProcess2Gradients(inpic=img_hsv_s,
+                                        doGaussBlur = doGaussBlur, gaussKernelSize=gaussBlurKernelSize, gausssigmaSize=0,
+                                        gradMode=gradMode, gradSize=gradSize)
+    gradients_v = imgProcess2Gradients(inpic=img_hsv_v,
+                                        doGaussBlur = doGaussBlur, gaussKernelSize=gaussBlurKernelSize, gausssigmaSize=0,
+                                        gradMode=gradMode, gradSize=gradSize)
 
     # weight hue/color gradient by saturation as low saturated pixel have huge hue/color noise
     gradients_h_weighted = np.uint8(gradients_h * (img_hsv_s * (1.0 / 255)))
