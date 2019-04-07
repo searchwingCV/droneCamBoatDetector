@@ -76,12 +76,15 @@ def callbackImg(data):
     startAll = time.time()
 
     #Get Picture
+    start = time.time()
     cv_img = cvbridge.imgmsg_to_cv2(data, "bgr8")
     rgb=cv2.cvtColor(cv_img,cv2.COLOR_BGR2RGB)
+    end = time.time()
+    print("convert pic [sek]:",end - start)
 
     ####Run ROI-Detection Pipeline
     start = time.time()
-    ROIs,contours,mask_img=roiDetector.detectROIs(rgb, doGaussBlur=True, gaussBlurKernelSize=5, gradSize=3, gradThreshold=0.994, openSize=2)
+    ROIs,contours,mask_img=roiDetector.detectROIs(rgb, doGaussBlur=False, gaussBlurKernelSize=5, gradSize=3, gradThreshold=0.9994, openSize=2)
     end = time.time()
     imgDbgVis = roiDetector.drawBoundingBoxesToImg(rgb,ROIs)
     print("detectROIs [sek]:",end - start)
@@ -101,7 +104,7 @@ def callbackImg(data):
     min3DLen = 2  # [m]
     max3DLen = 35  # [m]
     min2DSize = 13  # [pix]
-    max2DSize = 80  # [pix]
+    max2DSize = 150  # [pix]
     min2dArea = 13 * 13
 
     contoursSizeFiltered=[]
@@ -148,16 +151,24 @@ def callbackImg(data):
     associationTresh = 40#[m]
     tracker.addDetections(valid3DDetections,associationTresh)
     trackedBoats=[]
-    trackedBoats=tracker.getTrackings(minTrackingCount=3) # all tracked objects with got trackingcount >= minTrackingCount-times are estimated as boats
+    trackedBoats=tracker.getTrackings(minTrackingCount=3) # all tracked objects which got tracked >= minTrackingCount-times are considered as boats
+    for oneBoat in trackedBoats:
+        print("Tracker found boat: id ",oneBoat.id," trackCount ",oneBoat.trackingCount," lifetime ",oneBoat.lifetime);
     end = time.time()
-    print("track boats[sek]:",end - start)
+    print("Tracker[sek]:",end - start)
 
+    #DbgVis
+    start = time.time()
     dbgVis.createDbgVisImage(imgDbgVis,ROIsSizeFiltered,tracker,picStamp)
     dbgVis.createImageEdges(imgDbgVis,drone3dPosInMap,picStamp)
     dbgVis.createPlanePath(imgDbgVis,drone3dPosInMap,picStamp)
+    end = time.time()
+    print("DbgVis[sek]:",end - start)
 
     endAll = time.time()
     print("================================== sum of all [sek]:",endAll - startAll)
+
+
 
 
 if __name__ == '__main__':

@@ -27,6 +27,8 @@ class Track():
         self.lifetime=lifetime
     def addNewPos(self,pos):
         self.positionsBuffer.append(pos)
+    def getPos(self):
+        return self.positionsBuffer[-1]
     def getAveragePos(self):
         return np.mean(self.positionsBuffer, axis=0)
 
@@ -47,7 +49,7 @@ class roiTracker():
     def getTrackPoints(self):
         temp=[]
         for oneTrack in self.tracks:
-            temp.append(oneTrack.getAveragePos())
+            temp.append(oneTrack.getPos())
         trackPoints=np.asarray(temp)
         return trackPoints
 
@@ -72,23 +74,25 @@ class roiTracker():
                     => row_ind = sorted => detections
                     => col_ind = assignments => which tracking gets assigned to the detection
             """
-            for oneRow_ind in row_ind:
+            for oneRow_ind in row_ind: 
                 currentDetection=detectionPoints[oneRow_ind]
                 assignedTrackIdx=col_ind[oneRow_ind]
                 assignedEuclidDist = euclidDist[oneRow_ind,assignedTrackIdx]
                 # If new detection is near old track : assign new detection to old track
                 if assignedEuclidDist < associationTresh:
                     self.tracks[assignedTrackIdx].setLifetime(initLifetime)
-                    #posold=self.tracks[assignedTrackIdx].getAveragePos()
+                    #posold=self.tracks[assignedTrackIdx].getPos()
                     #dist = np.linalg.norm(posold-currentDetection)
                     #print(self.tracks[assignedTrackIdx].id)
                     #print(dist)
                     self.tracks[assignedTrackIdx].addNewPos(currentDetection)
                     self.tracks[assignedTrackIdx].incrTrackingCount()
+                    print("Tracker : assignment found => new pos assigned to id ",self.tracks[assignedTrackIdx].id," dist ",int(assignedEuclidDist),"[m]")
                 # Create new Track
                 else:
                     newTrack = Track(currentDetection, self.getNewId())
                     self.tracks.append(newTrack)
+                    print("Tracker : assignment not found => newtrack id ",newTrack.id);
 
         newTracks=[]
         for oneTrack in self.tracks:

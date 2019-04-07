@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 ####################################################################################
-# The central ROS node to receive all datastreams
-# It receives images from the camera
-# It outputs 3D-position estimates of the detected boats
+# Debug visualizations for rviz
 ####################################################################################
 import cv2
 cv2.useOptimized()
@@ -45,7 +43,7 @@ class dbgVis():
         allTracks = tracker.getTrackings(minTrackingCount=0)
         trackedBoats = tracker.getTrackings(minTrackingCount=3)
         for oneTrack in allTracks:
-            track3DPos = oneTrack.getAveragePos()
+            track3DPos = oneTrack.getPos()
 
             track2DPos = np.uint16(imagePointTransformations.project3DPosToPic(track3DPos, self.camModel, stamp))
             crossLen = 5
@@ -63,7 +61,7 @@ class dbgVis():
             """
         # visualize 3d Pos of valid tracked objects
         for oneTrack in trackedBoats:
-            track3DPos = oneTrack.getAveragePos()
+            track3DPos = oneTrack.getPos()
             frameName = "B" + str(oneTrack.id)  # + "c" + str(oneTrack.trackingCount)
             tf_broadcaster.sendTransform(track3DPos,
                                          (0.0, 0.0, 0.0, 1.0),
@@ -82,7 +80,7 @@ class dbgVis():
             fontScale = 0.7
             fontColor = (0, 255, 0)
             lineType = 2
-            cv2.putText(image, str(oneTrack.id),
+            cv2.putText(image, str(oneTrack.id) + "c" + str(oneTrack.trackingCount),
                         textpos,
                         font,
                         fontScale,

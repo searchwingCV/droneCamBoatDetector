@@ -123,6 +123,16 @@ def morph_pic(inpic, kernelsize, operation):
     opening = cv2.morphologyEx(inpic, operation, kernel)
     return opening
 
+def erode_pic(inpic, kernelsize):
+    """
+    erode image
+    :param inpic: inpic
+    :param kernelsize: kernelsize of the erode
+    :return:
+    """
+    kernel = np.ones((kernelsize, kernelsize), np.uint8)  # 4,4
+    img_dilated = cv2.erode(inpic, kernel, iterations=1)
+    return img_dilated
 
 def dilate_pic(inpic, kernelsize):
     """
@@ -182,11 +192,21 @@ def calc_grad_pic(inPic, ksize, mode):
         kw = dict(ksize=ksize, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT) # BORDER_DEFAULT == BORDER_REFLECT_101 => replicate pixel outside image
         grad_x = cv2.Sobel(inPic, ddepth, 1, 0, **kw)
         grad_y = cv2.Sobel(inPic, ddepth, 0, 1, **kw)
-        # Converting back to uint8.
-        abs_grad_x = cv2.convertScaleAbs(grad_x)
-        abs_grad_y = cv2.convertScaleAbs(grad_y)
+        grad_x = np.abs(grad_x)
+        grad_y = np.abs(grad_y)
+        abs_grad_x = np.uint8(grad_x)
+        abs_grad_y = np.uint8(grad_y)
         sobel = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
         # sobel_no_blend = cv2.add(abs_grad_x, abs_grad_y)
+        """
+        #old code 
+        grad_xS16=cv::abs(grad_xS16);
+        grad_yS16=cv::abs(grad_yS16);
+        double scaling = 0.5;
+        grad_xS16.convertTo(abs_xU8,CV_8U,scaling); // todo speedup convertto
+        grad_yS16.convertTo(abs_yU8,CV_8U,scaling); // todo speedup convertto
+        cv::add(abs_xU8,abs_yU8,added);
+        """
 
     if (mode == "scharr"):
         grad_x = cv2.Scharr(inPic, ddepth, 1, 0)
@@ -309,15 +329,17 @@ def detectROIs(img, doGaussBlur=True, gaussBlurKernelSize=5,gradSize=3, gradThre
                                         gradMode=gradMode, gradSize=gradSize)
 
     # weight hue/color gradient by saturation as low saturated pixel have huge hue/color noise
-    gradients_h_weighted = np.uint8(gradients_h * (img_hsv_s * (1.0 / 255)))
+    gradients_h_weighted = np.uint8(gradients_h * ((1.0 / 255)*img_hsv_s))
 
-    gradients_combined_1 = Add_Pics(gradients_h_weighted, gradients_s)
-    gradients_combined_2 = Add_Pics(gradients_combined_1, gradients_v)
+    #gradients_combined_1 = Add_Pics(gradients_h_weighted, gradients_s)
+    #gradients_combined_2 = Add_Pics(gradients_combined_1, gradients_v)
+    gradients_combined = gradients_h_weighted+gradients_s+gradients_v
 
-    grad_threshed = percentile_threshold_Pic(gradients_combined_2, gradThreshold)
+    grad_threshed = percentile_threshold_Pic(gradients_combined, gradThreshold)
     # img_threshed_denoised = denoise_pic(img_threshed,kernelsize=2,iterations=1)
-    img_morph_opened = morph_pic(grad_threshed, openSize, cv2.MORPH_OPEN)  # openSize=2
-    img_dilated = dilate_pic(img_morph_opened, 5)
+    #img_morph_opened = morph_pic(grad_threshed, openSize, cv2.MORPH_OPEN)  # openSize=2
+    img_eroded = erode_pic(grad_threshed, 2)
+    img_dilated = dilate_pic(img_eroded, 11)
     contours = getContors_pic(img_dilated)
     boundingBoxes = getBoundingBoxesFromContours(contours)
 
