@@ -53,10 +53,6 @@ Setup environment:
 ```
 source /catkin_ws/devel/setup.bash
 ```
-Tell ROS to use the provided timestamps from the dataset for the internal clock:
-```
-rosparam set use_sim_time true
-```
 Start boatdetector:
 ```
 roslaunch searchwing bodenseeDataset.launch

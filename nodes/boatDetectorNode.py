@@ -51,6 +51,9 @@ dbgVis = debugVis.dbgVis()
 cvbridge = CvBridge()
 dirname, filename = os.path.split(sys.argv[0])
 
+#Run simulation, comment this out if not
+rospy.set_param('use_sim_time', True)
+
 #Get cam intrinsic calibration
 camModel = cameramodels.PinholeCameraModel()
 intrinsicCalibPath = dirname + "/../config/bodenseeCamCalibResized.yaml"
