@@ -1,3 +1,12 @@
+
+# DEPRECATED CODE
+
+For more info visit 
+
+wiki: https://wiki.searchwing.org/en/home/Development/Payload-Camera/searchwing-bilderkennung
+
+
+
 # ComputerVision for searchwing drones
 ![alt text](https://raw.githubusercontent.com/searchwingCV/droneCamBoatDetector/master/screenshot.jpg)
 * Left: 3D View 
